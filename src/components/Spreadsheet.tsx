@@ -22,6 +22,7 @@ import {
   Link,
   GitFork,
 } from 'lucide-react'
+import {toast, Toaster } from 'react-hot-toast'
 
 export default function Spreadsheet() {
   const [selectedCell, setSelectedCell] = useState<[number, string] | null>(null)
@@ -68,10 +69,11 @@ export default function Spreadsheet() {
     }
   }
 
-  
+    const notify = (msg: string) => toast.success(msg)
 
   return (
-    <div className="w-[1440px] h-[1024px] flex flex-col overflow-hidden bg-[#F8FAFC] text-sm text-gray-800 font-medium">
+    <div className="w-full h-screen flex flex-col overflow-hidden bg-[#F8FAFC] text-sm text-gray-800 font-medium">
+      <Toaster />
       {/* Top Nav */}
       <div className="flex justify-between items-center px-4 pt-2">
         <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -84,7 +86,7 @@ export default function Spreadsheet() {
           <span>Folder 2</span>
           <span>{'>'}</span>
           <span className="text-black font-semibold">Spreadsheet 3</span>
-          <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                    <MoreHorizontal className="w-5 h-5 text-gray-600 cursor-pointer hover:text-black" onClick={() => notify('More options')} />
         </div>
 
         <div className="flex items-center gap-4">
@@ -92,8 +94,8 @@ export default function Spreadsheet() {
             <input type="text" placeholder="Search within sheet" className="border rounded px-3 py-1 text-sm" />
             <Search className="absolute right-2 top-1.5 w-4 h-4 text-gray-400" />
           </div>
-          <div className="relative">
-            <Bell className="w-5 h-5 text-gray-500" />
+          <div className="relative cursor-pointer" onClick={() => notify('Notifications')}>
+            <Bell className="w-5 h-5 text-gray-500 hover:text-black" />
             <span className="absolute -top-1 -right-1 text-xs bg-green-500 text-white rounded-full px-1">2</span>
           </div>
           <div className="flex items-center gap-2">
@@ -109,18 +111,18 @@ export default function Spreadsheet() {
       {/* Toolbar */}
       <div className="flex justify-between items-center h-[56px] px-4 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 text-gray-600">Tool bar<ChevronsRight className="w-4 h-4" /> </div>
-          <div className="flex items-center gap-1 text-gray-600"><EyeOff className="w-4 h-4" /> Hide fields</div>
-          <div className="flex items-center gap-1 text-gray-600"><SortAsc className="w-4 h-4" /> Sort</div>
-          <div className="flex items-center gap-1 text-gray-600"><Filter className="w-4 h-4" /> Filter</div>
-          <div className="flex items-center gap-1 text-gray-600"><LayoutGrid className="w-4 h-4" /> Cell view</div>
+          <button onClick={() => notify('Toolbar clicked')} className="flex items-center gap-1 text-gray-600 hover:text-black"><span>Tool bar</span><ChevronsRight className="w-4 h-4" /> </button>
+          <button onClick={() => notify('Hide fields')} className="flex items-center gap-1 text-gray-600 hover:text-black"><EyeOff className="w-4 h-4" /> Hide fields</button>
+          <button onClick={() => notify('Sort')} className="flex items-center gap-1 text-gray-600 hover:text-black"><SortAsc className="w-4 h-4" /> Sort</button>
+          <button onClick={() => notify('Filter')} className="flex items-center gap-1 text-gray-600 hover:text-black"><Filter className="w-4 h-4" /> Filter</button>
+          <button onClick={() => notify('Cell view')} className="flex items-center gap-1 text-gray-600 hover:text-black"><LayoutGrid className="w-4 h-4" /> Cell view</button>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1 text-sm px-2 py-1 border border-gray-300 rounded"><Upload className="w-4 h-4" /> Import</button>
-          <button className="flex items-center gap-1 text-sm px-2 py-1 border border-gray-300 rounded"><Download className="w-4 h-4" /> Export</button>
-          <button className="flex items-center gap-1 text-sm px-2 py-1 border border-gray-300 rounded"><Share2 className="w-4 h-4" /> Share</button>
-          <button className="flex items-center gap-1 text-sm px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"><GitFork  className="w-4 h-4 rotate-180" /> New Action</button>
+          <button onClick={() => notify('Importing...')} className="flex items-center gap-1 text-sm px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"><Upload className="w-4 h-4" /> Import</button>
+          <button onClick={() => notify('Exporting...')} className="flex items-center gap-1 text-sm px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"><Download className="w-4 h-4" /> Export</button>
+          <button onClick={() => notify('Sharing...')} className="flex items-center gap-1 text-sm px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"><Share2 className="w-4 h-4" /> Share</button>
+          <button onClick={() => notify('Creating new action')} className="flex items-center gap-1 text-sm px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"><GitFork className="w-4 h-4 rotate-180" /> New Action</button>
         </div>
       </div>
 
