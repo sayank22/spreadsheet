@@ -1,16 +1,15 @@
 // data/mockData.ts
 
-
 import {
   ClipboardList,
   CalendarDays,
   CheckCircle,
   User,
-  Link,
-  Users
+  Link as LinkIcon,
+  Users,
 } from 'lucide-react'
 
-export const columns = [
+export const initialColumns = [
   {
     accessorKey: 'id',
     header: '#',
@@ -51,7 +50,7 @@ export const columns = [
     accessorKey: 'url',
     header: () => (
       <div className="flex items-center gap-1 text-gray-600">
-        <Link className="w-4 h-4" /> URL
+        <LinkIcon className="w-4 h-4" /> URL
       </div>
     ),
   },
@@ -66,30 +65,30 @@ export const columns = [
   {
     accessorKey: 'priority',
     header: () => (
-      <div className="flex items-center gap-1 text-gray-600">
-         Priority
-      </div>
+      <div className="flex items-center gap-1 text-gray-600">Priority</div>
     ),
   },
   {
     accessorKey: 'dueDate',
     header: () => (
-      <div className="flex items-center gap-1 text-gray-600">
-         Due Date
-      </div>
+      <div className="flex items-center gap-1 text-gray-600">Due Date</div>
     ),
   },
   {
     accessorKey: 'estValue',
     header: () => (
-      <div className="flex items-center gap-1 text-gray-600">
-         Est. Value
-      </div>
+      <div className="flex items-center gap-1 text-gray-600">Est. Value</div>
     ),
   },
- 
-]
+  {
+  accessorKey: 'actions',
+  header: () => (
+    <div className="flex items-center gap-1 text-gray-600">
+    </div>
+  ),
+},
 
+]
 
 export const data = [
   {
@@ -103,7 +102,7 @@ export const data = [
     priority: 'Medium',
     dueDate: '20-11-2024',
     estValue: '6,200,000 ₹',
-    actions: ''
+    actions: '',
   },
   {
     id: 2,
@@ -116,7 +115,7 @@ export const data = [
     priority: 'High',
     dueDate: '30-10-2024',
     estValue: '3,500,000 ₹',
-    actions: ''
+    actions: '',
   },
   {
     id: 3,
@@ -129,7 +128,7 @@ export const data = [
     priority: 'Medium',
     dueDate: '10-12-2024',
     estValue: '4,750,000 ₹',
-    actions: ''
+    actions: '',
   },
   {
     id: 4,
@@ -142,7 +141,7 @@ export const data = [
     priority: 'Low',
     dueDate: '15-01-2025',
     estValue: '5,900,000 ₹',
-    actions: ''
+    actions: '',
   },
   {
     id: 5,
@@ -155,6 +154,6 @@ export const data = [
     priority: 'Low',
     dueDate: '30-01-2025',
     estValue: '2,800,000 ₹',
-    actions: ''
-  }
-];
+    actions: '',
+  },
+]
