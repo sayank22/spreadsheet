@@ -13,6 +13,7 @@ export const initialColumns = [
   {
     accessorKey: 'id',
     header: '#',
+    enableResizing: true,
   },
   {
     accessorKey: 'jobRequest',
@@ -21,6 +22,7 @@ export const initialColumns = [
         <ClipboardList className="w-4 h-4" /> Job Request
       </div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'submitted',
@@ -29,6 +31,7 @@ export const initialColumns = [
         <CalendarDays className="w-4 h-4" /> Submitted
       </div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'status',
@@ -37,6 +40,7 @@ export const initialColumns = [
         <CheckCircle className="w-4 h-4" /> Status
       </div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'submitter',
@@ -45,6 +49,7 @@ export const initialColumns = [
         <User className="w-4 h-4" /> Submitter
       </div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'url',
@@ -53,6 +58,7 @@ export const initialColumns = [
         <LinkIcon className="w-4 h-4" /> URL
       </div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'assigned',
@@ -61,24 +67,28 @@ export const initialColumns = [
         <Users className="w-4 h-4" /> Assigned
       </div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'priority',
     header: () => (
       <div className="flex items-center gap-1 text-gray-600">Priority</div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'dueDate',
     header: () => (
       <div className="flex items-center gap-1 text-gray-600">Due Date</div>
     ),
+      enableResizing: true,
   },
   {
     accessorKey: 'estValue',
     header: () => (
       <div className="flex items-center gap-1 text-gray-600">Est. Value</div>
     ),
+      enableResizing: true,
   },
   {
   accessorKey: 'actions',
@@ -86,6 +96,7 @@ export const initialColumns = [
     <div className="flex items-center gap-1 text-gray-600">
     </div>
   ),
+      enableResizing: true,
 },
 
 ]

@@ -1,69 +1,63 @@
-# React + TypeScript + Vite
+## Made By - Sayan Kundu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**B.Tech in Computer Science | Full Stack Developer | Passionate about building real-world solutions**
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🔗 Links
+[![Resume](https://img.shields.io/badge/View_Reasume-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://drive.google.com/file/d/1Mhn6U396WW0DiciBdBbsP2eJP5P9CSg4/view?usp=drive_link)
+[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sayan-kundu-70b5442b6/)
+[![Github](https://img.shields.io/badge/github-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://github.com/sayank22)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# React Spreadsheet View
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+A pixel-perfect, static spreadsheet-like UI built with **React**, **TypeScript**, and **Tailwind CSS**. This project replicates a spreadsheet experience based on the provided Figma design.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+Live Demo: [https://spreadshet-sayankundu.netlify.app](https://spreadshet-sayankundu.netlify.app)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+# Goal
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a static, front-end-only React prototype that visually matches the provided Figma screenshot of the product’s spreadsheet view.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+
+## Features
+
+- 📌 **Pixel-perfect layout** as per [Figma design](https://www.figma.com/design/3nywpu5sz45RrCmwe68QZP/Intern-Design-Assigment?node-id=2-2535&t=DJGGMt8I4fiZjoIB-1)
+- 🧮 Google Sheets/Excel-like spreadsheet interface
+- ✅ All buttons and UI elements are interactive or log to console
+- 💡 Type-safe and lint-clean codebase
+
+---
+
+## 🛠️ Tech Stack
+
+- **React 18** (Vite)
+- **TypeScript** (strict mode)
+- **Tailwind CSS** (for styling)
+- **@tanstack/react-table v8** (for grid layout)
+- **Lucide React Icons**
+- **React Hot Toast** (for notifications)
+
+---
+
+## Getting Started
+
+# 1. Clone the repo
+   ```bash
+   git clone https://github.com/sayank22/spreadsheet.git
+   cd react-spreadsheet-view
+   npm install
+   npm run dev
+   ```
+---
+
+## Demo
+
+See it live: [https://spreadshet-sayankundu.netlify.app](https://spreadshet-sayankundu.netlify.app)
+
+![Demo]("react-spreadsheet-view\src\assets\2.png")
+

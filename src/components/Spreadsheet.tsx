@@ -73,6 +73,7 @@ export default function Spreadsheet() {
   }
 
   const notify = (msg: string) => toast.success(msg)
+  
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-sm text-gray-800 font-medium">
