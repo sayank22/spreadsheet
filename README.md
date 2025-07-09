@@ -59,5 +59,6 @@ Create a static, front-end-only React prototype that visually matches the provid
 
 See it live: [https://spreadshet-sayankundu.netlify.app](https://spreadshet-sayankundu.netlify.app)
 
-![Demo]("\src\assets\2.png")
+![Demo](src/assets/2.png)
+
 
