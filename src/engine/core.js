@@ -792,6 +792,37 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         recalculate()
     }
 
+    function executePaste(updates) {
+        // Take a snapshot of the grid BEFORE we paste
+        const snapshot = takeSnapshot();
+        const previousRows = rows;
+        const previousCols = cols;
+        
+        // Apply all the pasted values without polluting the undo stack
+        let changed = false;
+        updates.forEach(({ r, c, val }) => {
+            const currentRaw = getCellRaw(r, c).raw;
+            if (currentRaw !== val) {
+                setCellRaw(r, c, val);
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            // Push ONE single action to the undo stack
+            // Because the type is not 'set', your existing undo() logic will 
+            // naturally fall into the snapshot-restore block!
+            pushToUndoStack({ 
+                type: 'paste', 
+                snap: snapshot, 
+                oldRows: previousRows, 
+                oldCols: previousCols 
+            });
+            _generation++;
+            recalculate();
+        }
+    }
+
     function executeInsertRow(atIndex) {
         const snapshot = takeSnapshot()
         const previousRows = rows
@@ -908,6 +939,7 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         get cols() { return cols },
         getCell: getCellForDisplay,
         setCell: executeSetCell,
+        executePaste,
         insertRow: executeInsertRow,
         deleteRow: executeDeleteRow,
         insertColumn: executeInsertColumn,

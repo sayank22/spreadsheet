@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react'
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import './App.css'
 import { createEngine } from './engine/core.js'
 
@@ -18,7 +18,173 @@ export default function App() {
   const [cellStyles, setCellStyles] = useState({})
   const cellInputRef = useRef(null)
 
+  // rowOrder keeps track of which row index renders at which visual position
+  const [rowOrder, setRowOrder] = useState(() => Array.from({ length: TOTAL_ROWS }, (_, i) => i))
+  
+  // Tracks which column is currently sorted and in what direction ('asc', 'desc', or null)
+  const [sortState, setSortState] = useState({ col: null, direction: null }) 
+  
+// Tracks active filters: { colIndex: [array of hidden values] }
+  const [filters, setFilters] = useState({})
+
+  // ────── Filtering Logic ──────
+  // Tracks which column's filter dropdown is currently open
+  const [activeFilterMenu, setActiveFilterMenu] = useState(null);
+
+  // Gets all unique values in a specific column to populate the filter checkboxes
+  const getUniqueValues = useCallback((colIndex) => {
+    const values = new Set();
+    for (let r = 0; r < engine.rows; r++) {
+      const val = engine.getCell(r, colIndex).computed ?? engine.getCell(r, colIndex).raw;
+      values.add(val ?? "");
+    }
+    return Array.from(values).sort((a, b) => {
+  if (a === "" && b === "") return 0
+  if (a === "") return 1
+  if (b === "") return -1
+
+  if (!isNaN(a) && !isNaN(b))
+    return Number(a) - Number(b)
+
+  return String(a).localeCompare(String(b))
+});
+  }, [engine]);
+
+  // Copy/paste
+
+  useEffect(() => {
+
+  const handleGlobalCopy = (e) => {
+
+    if (editingCell || document.activeElement.tagName === 'INPUT') return;
+    if (!selectedCell) return;
+
+    e.preventDefault();
+
+    const cellData =
+      engine.getCell(selectedCell.r, selectedCell.c);
+
+    const copyText =
+      cellData.computed !== null &&
+      cellData.computed !== ''
+        ? String(cellData.computed)
+        : cellData.raw;
+
+    e.clipboardData.setData(
+      'text/plain',
+      copyText
+    );
+  };
+
+  const handleGlobalPaste = (e) => {
+
+    if (editingCell || document.activeElement.tagName === 'INPUT') return;
+    if (!selectedCell) return;
+
+    e.preventDefault();
+
+    const clipboardText =
+      (e.clipboardData || window.clipboardData)
+        .getData('text/plain');
+
+    if (!clipboardText) return;
+
+    const rows = clipboardText
+      .split(/\r?\n/)
+      .filter(r => r.length > 0);
+
+    let targetRow = selectedCell.r;
+    const updates = []; // Array to hold our batch
+
+    rows.forEach(rowStr => {
+      if (targetRow >= engine.rows) return;
+      const cols = rowStr.split('\t');
+      let targetCol = selectedCell.c;
+
+      cols.forEach(cellVal => {
+        if (targetCol >= engine.cols) return;
+        
+        // Collect the update instead of applying it immediately
+        updates.push({ r: targetRow, c: targetCol, val: cellVal });
+        targetCol++;
+      });
+      targetRow++;
+    });
+
+    // Send the batch to the engine
+    if (updates.length > 0) {
+      engine.executePaste(updates);
+      forceRerender();
+    }
+  };
+
+  window.addEventListener('copy', handleGlobalCopy);
+  window.addEventListener('paste', handleGlobalPaste);
+
+  return () => {
+    window.removeEventListener('copy', handleGlobalCopy);
+    window.removeEventListener('paste', handleGlobalPaste);
+  };
+
+}, [selectedCell, editingCell, engine, forceRerender]);
+
+  // Toggles whether a specific value is hidden or shown in a column
+  const toggleFilterValue = useCallback((colIndex, value) => {
+    setFilters(prev => {
+      const currentHidden = prev[colIndex] || [];
+      if (currentHidden.includes(value)) {
+        // If it's already hidden, remove it from the hidden list (make it visible)
+        return { ...prev, [colIndex]: currentHidden.filter(v => v !== value) };
+      } else {
+        // Add it to the hidden list
+        return { ...prev, [colIndex]: [...currentHidden, value] };
+      }
+    });
+  }, []);
+
   const forceRerender = useCallback(() => setVersion(v => v + 1), [])
+
+  // ────── Sorting Logic ──────
+  const toggleSort = useCallback((colIndex) => {
+    setActiveFilterMenu(null)
+    setSortState(prev => {
+      // 1. Determine the new direction
+      let newDirection = 'asc';
+      if (prev.col === colIndex) {
+        if (prev.direction === 'asc') newDirection = 'desc';
+        else if (prev.direction === 'desc') newDirection = null; // Reset
+      }
+
+      // 2. Apply the View-Layer Sort
+      if (!newDirection) {
+        // Reset to original order
+        setRowOrder(Array.from({ length: engine.rows }, (_, i) => i));
+      } else {
+        // Sort the rows based on computed values
+        setRowOrder(currentOrder => {
+          const newOrder = [...currentOrder];
+          newOrder.sort((a, b) => {
+            // Get computed values, fallback to raw if computed is null/empty
+            let v1 = engine.getCell(a, colIndex).computed ?? engine.getCell(a, colIndex).raw;
+            let v2 = engine.getCell(b, colIndex).computed ?? engine.getCell(b, colIndex).raw;
+
+            // Push empty cells to the bottom regardless of sort direction
+            if (v1 === "" && v2 === "") return 0;
+            if (v1 === "") return 1; 
+            if (v2 === "") return -1;
+
+            if (v1 === v2) return 0;
+            const comparison = v1 > v2 ? 1 : -1;
+            return newDirection === 'asc' ? comparison : -comparison;
+          });
+          return newOrder;
+        });
+      }
+
+      // 3. Update the sort state
+      return { col: colIndex, direction: newDirection };
+    });
+  }, [engine]);
 
   // ────── Cell style helpers ──────
 
@@ -201,6 +367,11 @@ export default function App() {
     if (!selectedCell) return
     engine.insertRow(selectedCell.r)
     forceRerender()
+
+    setRowOrder(
+    Array.from({ length: engine.rows }, (_, i) => i)
+  )
+
     setSelectedCell({ r: selectedCell.r + 1, c: selectedCell.c })
   }, [selectedCell, engine, forceRerender])
 
@@ -208,6 +379,9 @@ export default function App() {
     if (!selectedCell) return
     engine.deleteRow(selectedCell.r)
     forceRerender()
+    setRowOrder(
+    Array.from({ length: engine.rows }, (_, i) => i)
+  )
     if (selectedCell.r >= engine.rows) {
       setSelectedCell({ r: engine.rows - 1, c: selectedCell.c })
     }
@@ -216,14 +390,20 @@ export default function App() {
   const insertColumn = useCallback(() => {
     if (!selectedCell) return
     engine.insertColumn(selectedCell.c)
-    forceRerender()
-    setSelectedCell({ r: selectedCell.r, c: selectedCell.c + 1 })
-  }, [selectedCell, engine, forceRerender])
+  forceRerender()
+  setSelectedCell({
+    r: selectedCell.r,
+    c: selectedCell.c + 1
+  })
+}, [selectedCell, engine, forceRerender])
 
   const deleteColumn = useCallback(() => {
     if (!selectedCell) return
     engine.deleteColumn(selectedCell.c)
     forceRerender()
+    setRowOrder(
+    Array.from({ length: engine.rows }, (_, i) => i)
+  )
     if (selectedCell.c >= engine.cols) {
       setSelectedCell({ r: selectedCell.r, c: engine.cols - 1 })
     }
@@ -353,14 +533,101 @@ export default function App() {
               <tr>
                 <th className="col-header-blank"></th>
                 {Array.from({ length: engine.cols }, (_, colIndex) => (
-                  <th key={colIndex} className="col-header">
-                    {getColumnLabel(colIndex)}
-                  </th>
-                ))}
+  <th 
+    key={colIndex} 
+    className="col-header"
+    style={{ cursor: 'pointer', userSelect: 'none', position: 'relative' }}
+    onClick={() => toggleSort(colIndex)}
+    title="Click to sort"
+  >
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
+      {getColumnLabel(colIndex)}
+      
+      {/* Sort Indicator */}
+      {sortState.col === colIndex && sortState.direction && (
+        <span style={{ fontSize: '10px' }}>
+          {sortState.direction === 'asc' ? '▲' : '▼'}
+        </span>
+      )}
+
+      {/* Filter Button */}
+      <span 
+        onClick={(e) => {
+          e.stopPropagation(); // Prevents the sorting click from triggering
+          setActiveFilterMenu(activeFilterMenu === colIndex ? null : colIndex);
+        }}
+        style={{ 
+          fontSize: '12px', 
+          marginLeft: 'auto',
+          padding: '2px 4px',
+          borderRadius: '3px',
+          background: filters[colIndex]?.length > 0 ? '#d3e3fd' : 'transparent' // Highlight if active
+        }}
+        title="Filter"
+      >
+        ▼
+      </span>
+    </div>
+
+    {/* Filter Dropdown Menu */}
+    {activeFilterMenu === colIndex && (
+      <div 
+        className="filter-menu" 
+        style={{ 
+          position: 'absolute', top: '100%', left: 0, 
+          background: 'white', border: '1px solid #ccc', 
+          zIndex: 100, padding: '8px', maxHeight: '200px', 
+          overflowY: 'auto', boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+          fontWeight: 'normal', color: '#333'
+        }} 
+        onClick={e => e.stopPropagation()} // Keep menu open when clicking inside
+      >
+        <div style={{ marginBottom: '8px', fontSize: '12px', fontWeight: 'bold' }}>Filter Values:</div>
+        {getUniqueValues(colIndex).map(val => (
+          <label key={val} style={{ display: 'flex', alignItems: 'center', gap: '4px', textAlign: 'left', whiteSpace: 'nowrap', fontSize: '12px', cursor: 'pointer', marginBottom: '4px' }}>
+            <input 
+              type="checkbox" 
+              checked={!(filters[colIndex] || []).includes(val)}
+              onChange={() => toggleFilterValue(colIndex, val)}
+            />
+            {val === "" ? "(Blanks)" : val}
+          </label>
+        ))}
+      </div>
+    )}
+  </th>
+))}
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: engine.rows }, (_, rowIndex) => (
+              {rowOrder
+  .filter(rowIndex => {
+
+    for (const colIndexStr in filters) {
+
+      const colIndex = parseInt(colIndexStr)
+
+      const hiddenValues = filters[colIndex]
+
+      if (hiddenValues && hiddenValues.length > 0) {
+
+        const cellVal = String(
+          engine.getCell(rowIndex, colIndex).computed ??
+          engine.getCell(rowIndex, colIndex).raw
+        )
+
+        if (hiddenValues.includes(cellVal)) {
+          return false
+        }
+
+      }
+
+    }
+
+    return true
+
+  })
+  .map(rowIndex => (
                 <tr key={rowIndex}>
                   <td className="row-header">{rowIndex + 1}</td>
                   {Array.from({ length: engine.cols }, (_, colIndex) => {
