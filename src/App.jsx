@@ -50,6 +50,9 @@ export default function App() {
 });
   }, [engine]);
 
+  // forceRender
+  const forceRerender = useCallback(() => setVersion(v => v + 1), [])
+
   // Copy/paste
 
   useEffect(() => {
@@ -141,8 +144,6 @@ export default function App() {
       }
     });
   }, []);
-
-  const forceRerender = useCallback(() => setVersion(v => v + 1), [])
 
   // ────── Sorting Logic ──────
   const toggleSort = useCallback((colIndex) => {
@@ -436,6 +437,90 @@ export default function App() {
   const formulaBarValue = editingCell
     ? editValue
     : (selectedCell ? engine.getCell(selectedCell.r, selectedCell.c).raw : '')
+
+    // local storage save
+
+useEffect(() => {
+
+  const timerId = setTimeout(() => {
+
+    try {
+
+      const stateToSave = {
+        engineData: engine.exportData(),
+        styles: cellStyles,
+        rowOrder,
+        filters
+      };
+
+      localStorage.setItem(
+        'spreadsheet_app_data',
+        JSON.stringify(stateToSave)
+      );
+
+    } catch (error) {
+
+      console.error("Save failed", error);
+
+      if (error.name === 'QuotaExceededError') {
+        alert("Local storage full");
+      }
+
+    }
+
+  }, 500);
+
+  return () => clearTimeout(timerId);
+
+}, [version, cellStyles, rowOrder, filters]);
+
+    // local strage load
+
+useEffect(() => {
+
+  try {
+
+    const savedData =
+      localStorage.getItem(
+        'spreadsheet_app_data'
+      );
+
+    if (savedData) {
+
+      const parsed =
+        JSON.parse(savedData);
+
+      if (parsed.engineData) {
+
+        engine.loadData(
+          parsed.engineData
+        );
+      }
+      if (parsed.styles) {
+        setCellStyles(parsed.styles);
+      }
+      if (parsed.filters) {
+        setFilters(parsed.filters);
+      }
+      if (parsed.rowOrder) {
+        setRowOrder(parsed.rowOrder);
+      }
+      forceRerender();
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Failed to parse saved spreadsheet data",
+      error
+    );
+
+    localStorage.removeItem(
+      'spreadsheet_app_data'
+    );
+  }
+
+}, []);
 
   // ────── Render ──────
 

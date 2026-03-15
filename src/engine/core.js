@@ -929,6 +929,49 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         return { raw: cell.raw, computed: value, error: null }
     }
 
+    // ── Serialization (Task 3) ──
+    
+    function exportData() {
+        const serializedCells = {};
+        for (const [key, value] of cells.entries()) {
+            serializedCells[key] = value.raw; // Only save raw input, not computed caches
+        }
+        return { 
+            rows, 
+            cols, 
+            cells: serializedCells 
+        };
+    }
+
+    function loadData(data) {
+        if (!data) return;
+        
+        if (typeof data.rows === "number")
+            rows = data.rows;
+
+       if (typeof data.cols === "number")
+        cols = data.cols;
+        
+        cells.clear();
+        graph.clear();
+        computedCache.clear();
+        dirtyCells.clear();
+        undoStack.length = 0; // History should not persist
+        redoStack.length = 0;
+        _generation++;
+
+        if (data.cells) {
+            for (const [key, raw] of Object.entries(data.cells)) {
+                cells.set(key, { raw, computed: null, error: null });
+                if (typeof raw === "string" && raw.startsWith('=')) {
+                    updateDependencies(key, raw);
+                }
+            }
+        }
+        markAllCellsDirty();
+        recalculate();
+    }
+
     // ── Public API ──
     // The engine exposes a limited API to prevent direct access to internal state
     // All cell operations go through the public methods which handle undo/redo,
@@ -940,6 +983,8 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         getCell: getCellForDisplay,
         setCell: executeSetCell,
         executePaste,
+        exportData,
+        loadData,
         insertRow: executeInsertRow,
         deleteRow: executeDeleteRow,
         insertColumn: executeInsertColumn,
