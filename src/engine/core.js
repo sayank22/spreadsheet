@@ -458,8 +458,6 @@ function shiftCellReferences(formula, rowShift, colShift, atIndex, isColumnOpera
 function extractCellReferences(formula) {
     const references = new Set()
     // Extract cell references using regex
-    // Note: This regex matches cell references like A1, B2, AA10, etc.
-    // It does NOT extract individual cells from ranges (e.g., A1:A5 only extracts A1 and A5)
     const regex = /([A-Z]+\d+)/g
     let match
     while ((match = regex.exec(formula)) !== null) {
@@ -593,7 +591,6 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         dirtyCells.clear()
 
         // Notify batch listeners if in batch mode
-        // WARNING: Batch mode is currently unused but may be needed for future features
         if (_batchMode) {
             _batchCallbacks.forEach(cb => cb())
         }

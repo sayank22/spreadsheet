@@ -27,7 +27,6 @@ export default function App() {
 // Tracks active filters: { colIndex: [array of hidden values] }
   const [filters, setFilters] = useState({})
 
-  // ────── Filtering Logic ──────
   // Tracks which column's filter dropdown is currently open
   const [activeFilterMenu, setActiveFilterMenu] = useState(null);
 
@@ -157,7 +156,7 @@ export default function App() {
     });
   }, []);
 
-  // ────── Sorting Logic ──────
+  // Sorting Logic
   const toggleSort = useCallback((colIndex) => {
     setActiveFilterMenu(null)
     setSortState(prev => {
