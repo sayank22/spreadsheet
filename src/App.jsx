@@ -80,17 +80,24 @@ export default function App() {
   };
 
   const handleGlobalPaste = (e) => {
-
-    if (editingCell || document.activeElement.tagName === 'INPUT') return;
-    if (!selectedCell) return;
-
-    e.preventDefault();
-
-    const clipboardText =
-      (e.clipboardData || window.clipboardData)
-        .getData('text/plain');
-
+    // 1. Get the clipboard text first so we can inspect it
+    const clipboardText = (e.clipboardData || window.clipboardData).getData('text/plain');
     if (!clipboardText) return;
+
+    // 2. Check if it looks like Excel/Sheets grid data (contains tabs or newlines)
+    const isGridPaste = clipboardText.includes('\t') || clipboardText.includes('\n');
+
+    // 3. If they are typing in the top formula bar, let them paste normally
+    if (document.activeElement.classList.contains('formula-bar-input')) return;
+
+    // 4. If they are editing a cell, but pasting simple text (NO tabs), let normal paste happen
+    if ((editingCell || document.activeElement.tagName === 'INPUT') && !isGridPaste) {
+      return; 
+    }
+
+    // 5. IF WE REACH HERE: It's an Excel grid! Intercept and distribute!
+    e.preventDefault();
+    if (!selectedCell) return;
 
     const rows = clipboardText
       .split(/\r?\n/)
@@ -117,6 +124,11 @@ export default function App() {
     // Send the batch to the engine
     if (updates.length > 0) {
       engine.executePaste(updates);
+      // Kick the user out of "Edit Mode" so they can see the newly pasted grid!
+      if (editingCell) {
+        setEditingCell(null);
+        setEditValue('');
+      }
       forceRerender();
     }
   };
@@ -295,6 +307,32 @@ export default function App() {
   const handleUndo = useCallback(() => { if (engine.undo()) forceRerender() }, [engine, forceRerender])
   const handleRedo = useCallback(() => { if (engine.redo()) forceRerender() }, [engine, forceRerender])
 
+    // ────── Global Keyboard Shortcuts (Ctrl+Z / Ctrl+Y) ──────
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      // Let the browser handle standard text undo if the user is actively typing in a box
+      if (editingCell || document.activeElement.tagName === 'INPUT') return;
+
+      // Check for Ctrl (Windows) or Cmd (Mac)
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            handleRedo(); // Ctrl+Shift+Z
+          } else {
+            handleUndo(); // Ctrl+Z
+          }
+        } else if (e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          handleRedo(); // Ctrl+Y
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [editingCell, handleUndo, handleRedo]);
+
   // ────── Formatting toggles ──────
 
   const toggleBold = useCallback(() => {
@@ -472,7 +510,7 @@ useEffect(() => {
 
   return () => clearTimeout(timerId);
 
-}, [version, cellStyles, rowOrder, filters]);
+}, [version, cellStyles, rowOrder, filters, engine]);
 
     // local strage load
 
@@ -519,8 +557,7 @@ useEffect(() => {
       'spreadsheet_app_data'
     );
   }
-
-}, []);
+}, [engine, forceRerender])
 
   // ────── Render ──────
 
