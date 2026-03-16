@@ -8,8 +8,14 @@ It supports formulas, dependency tracking, sorting, filtering, multi-cell paste,
 
 The goal of this assignment was to implement the required features while maintaining correct spreadsheet behavior, performance, and data integrity.
 
+## Demo Video
 
-## 🏗 Architecture Overview
+Loom video demonstrating all required features:
+
+https://www.loom.com/share/74e44888cb91452882e060337ba2c697
+
+
+## Architecture Overview
 The application separates the **Core Engine** (data, formulas, dependency graph, caching) from the **View Layer** (React UI). This ensures high performance and prevents visual UI changes from destructively mutating underlying data relationships.
 
 
@@ -49,9 +55,7 @@ The application separates the **Core Engine** (data, formulas, dependency graph,
 
 ### Formulas
 Try:
-=a1+b1
-=a1*10
-=a1*b1
+`=a1+b1 or =a1*10 or '=a1*b1`
 
 ## Getting Started
 
@@ -163,12 +167,6 @@ This application works on all modern browsers that support ES2020+ JavaScript:
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
-
-## Demo Video
-
-Loom video demonstrating all required features:
-
-https://www.loom.com/share/74e44888cb91452882e060337ba2c697
 
 # Spreadsheet
 
